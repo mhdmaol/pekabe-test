@@ -1,15 +1,23 @@
 # Hasil validasi
 
-- Acuan: tujuh PNG pengguna di `design_reference/`; layer Figma asli belum terakses.
+## Integrasi kurs API
+
 - Flutter 3.47.7 / Dart 3.13.5, Windows.
-- `flutter analyze`: No issues found.
-- `flutter test --dart-define=CAPTURE_PREVIEWS=true`: 9 tes lolos.
-- Layout kategori dan konversi diuji pada 320×568, 390×844 dan 1024×768.
-- Pratinjau kategori mobile, desktop dan konversi mata uang dirender; mata uang dan desktop diperiksa visual.
-- `flutter build web --release --no-wasm-dry-run`: berhasil; hasil di `build/web/` pada workspace. Build mengeluarkan peringatan font Cupertino dari bawaan framework; UI aplikasi menggunakan Material Icons dan ikon pada pratinjau tampil dengan benar.
-- `flutter build apk --debug`: gagal pada konfigurasi toolchain, karena Android sdkmanager gagal memasang NDK 28.2.13676358. Tidak ada APK yang dihasilkan. Pasang NDK tersebut dari Android Studio SDK Manager, lalu ulangi build. Belum diuji di perangkat Android fisik/emulator.
-- Kurs mata uang masih data demo statis. Semua kategori lain dihitung offline.
+- Provider: https://frankfurter.dev/ (v2), tanpa API key.
+- `dart run tool/check_currency_api.dart`: berhasil memanggil kode integrasi ke API sungguhan untuk USD/IDR, USD/EUR, USD/JPY.
+- Respons saat pemeriksaan bertanggal 25 November 2026. Nilainya dapat berubah; angka tes tidak dianggap sebagai kurs terbaru.
+- API diuji dengan header Origin lokal; respons menyediakan `Access-Control-Allow-Origin: *`.
+- `flutter analyze`: bersih setelah perbaikan lint.
+- `flutter test --dart-define=CAPTURE_PREVIEWS=true`: 14 tes lolos.
+- Tes mencakup loading, gagal lalu retry, kurs terakhir setelah refresh gagal, timeout, data tidak lengkap/rusak, kurs nol/negatif, tanggal invalid, cross currency, reverse, resume dan keluar halaman saat fetch masih berlangsung.
+- Tes UI dan PNG menggunakan fixture yang diinjeksi; tidak menggunakan jaringan sungguhan. Layout diuji pada 320×568, 390×844 dan 1024×768.
+- Snapshot hanya di memori halaman, tanpa cache disk. Tidak ada fallback angka demo.
+- Izin Internet ditambahkan ke manifest utama Android agar berlaku pada release.
 
-PNG pratinjau berasal dari render Flutter test, bukan screenshot browser/perangkat. Paket ZIP source mengecualikan cache, hasil build, file properti SDK lokal, dan konfigurasi editor. Setelah ekstraksi, jalankan `flutter pub get` sebelum menjalankan aplikasi.
+## Build dan visual
 
-Revisi warna: pemeriksaan kode bersih, 9 tes lolos, build web release berhasil. Render panjang (2 km = 200.000 cm) dan massa (5 kg = 5.000 gram) diperiksa secara visual.
+- Build web release diverifikasi ulang setelah integrasi API.
+- Pratinjau memakai font Roboto dan Material Icons yang dimuat dalam Flutter test, bukan screenshot perangkat.
+- Build web masih mengeluarkan peringatan font Cupertino bawaan framework; UI menggunakan Material Icons dan ikon dirender dengan benar.
+- Percobaan build Android sebelumnya gagal karena sdkmanager tidak berhasil memasang NDK 28.2.13676358. Belum ada APK atau tes perangkat Android. Pasang NDK tersebut lalu jalankan `flutter build apk --debug`.
+- Tampilan mengacu pada tujuh PNG pengguna di `design_reference/`; layer Figma asli belum terverifikasi.

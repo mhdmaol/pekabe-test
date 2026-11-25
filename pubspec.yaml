@@ -1,5 +1,5 @@
 name: pekabe_converter
-description: Offline unit converter implemented from supplied Pekabe design references.
+description: Unit converter with API exchange rates, implemented from Pekabe design references.
 publish_to: none
 version: 1.0.0+1
 environment:
@@ -7,6 +7,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^1.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

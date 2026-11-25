@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../components/organisms/category_grid/category_grid.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/currency_rate_source.dart';
 import '../converter_page/converter_page.dart';
 
 class CategoryPage extends StatelessWidget {
-  const CategoryPage({super.key, required this.onToggleTheme});
+  const CategoryPage({super.key, required this.onToggleTheme, this.rateSource});
+  final CurrencyRateSource? rateSource;
   final VoidCallback onToggleTheme;
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -89,7 +91,10 @@ class CategoryPage extends StatelessWidget {
                 CategoryGrid(
                   onSelected: (category) => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (context) => ConverterPage(category: category),
+                      builder: (context) => ConverterPage(
+                        category: category,
+                        rateSource: rateSource,
+                      ),
                     ),
                   ),
                 ),

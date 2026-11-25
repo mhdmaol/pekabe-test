@@ -7,7 +7,7 @@ class ConversionUnit {
   final String symbol;
   final String name;
 
-  /// Base units per unit; for currency this means USD per unit.
+  /// Base units per unit. Currency factors are unused; rates come from the API.
   final double factor;
 }
 
@@ -39,9 +39,9 @@ abstract final class ConversionCatalog {
     tint: Color(0xFFEFF6FF),
     units: [
       ConversionUnit('USD', 'Dolar Amerika', 1),
-      ConversionUnit('IDR', 'Rupiah Indonesia', 1 / 18000),
-      ConversionUnit('EUR', 'Euro', 1.08),
-      ConversionUnit('JPY', 'Yen Jepang', 0.0067),
+      ConversionUnit('IDR', 'Rupiah Indonesia', 1),
+      ConversionUnit('EUR', 'Euro', 1),
+      ConversionUnit('JPY', 'Yen Jepang', 1),
     ],
   );
   static const length = ConversionCategory(

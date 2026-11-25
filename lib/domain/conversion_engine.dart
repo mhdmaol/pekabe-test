@@ -7,6 +7,11 @@ abstract final class ConversionEngine {
     ConversionUnit from,
     ConversionUnit to,
   ) {
+    if (category.kind == ConversionKind.currency) {
+      throw ArgumentError(
+        'Use an API CurrencyRates snapshot for currency conversion',
+      );
+    }
     if (category.kind != ConversionKind.temperature) {
       return value * from.factor / to.factor;
     }

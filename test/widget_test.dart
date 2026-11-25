@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pekabe_converter/app.dart';
+
+import 'support/rate_fixture.dart';
+
 import 'package:pekabe_converter/components/molecules/category_card/category_card.dart';
 import 'package:pekabe_converter/components/molecules/conversion_field/conversion_field.dart';
 
@@ -12,14 +15,14 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const PekabeApp());
+    await tester.pumpWidget(PekabeApp(rateSource: FixtureRateSource()));
     expect(find.byType(CategoryCard), findsNWidgets(6));
     await tester.tap(find.text('Mata Uang'));
     await tester.pumpAndSettle();
-    expect(find.text('18.000'), findsOneWidget);
+    expect(find.text('18.235'), findsOneWidget);
     await tester.tap(find.text('2'));
     await tester.pump();
-    expect(find.text('216.000'), findsOneWidget);
+    expect(find.text('218.820'), findsOneWidget);
     await tester.tap(find.byTooltip('Tukar satuan'));
     await tester.pump();
     expect(
@@ -66,7 +69,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(const PekabeApp());
+      await tester.pumpWidget(PekabeApp(rateSource: FixtureRateSource()));
       for (final title in [
         'Mata Uang',
         'Satuan Ukuran',

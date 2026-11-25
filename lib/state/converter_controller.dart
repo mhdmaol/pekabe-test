@@ -1,17 +1,60 @@
 import 'package:flutter/foundation.dart';
 
 import '../domain/conversion_category.dart';
+import '../domain/currency_rates.dart';
+import '../data/currency_rate_source.dart';
 import '../domain/conversion_engine.dart';
 
 class ConverterController extends ChangeNotifier {
-  ConverterController(this.category)
-    : from = category.units.first,
+  ConverterController(this.category, {CurrencyRateSource? rateSource})
+    : _rateSource = rateSource ?? FrankfurterRateSource(),
+      from = category.units.first,
       to = category.units[1];
   ConversionCategory category;
   ConversionUnit from, to;
   String input = '1';
   double get value => double.tryParse(input) ?? 0;
-  double get result => ConversionEngine.convert(value, category, from, to);
+  final CurrencyRateSource _rateSource;
+  CurrencyRates? currencyRates;
+  bool isLoadingRates = false;
+  String? rateError;
+  bool _disposed = false;
+  double get result => category.kind == ConversionKind.currency
+      ? currencyRates?.convert(value, from.symbol, to.symbol) ?? double.nan
+      : ConversionEngine.convert(value, category, from, to);
+
+  Future<void> refreshRates() async {
+    if (_disposed ||
+        isLoadingRates ||
+        category.kind != ConversionKind.currency) {
+      return;
+    }
+    isLoadingRates = true;
+    rateError = null;
+    notifyListeners();
+    try {
+      final snapshot = await _rateSource.fetchLatest();
+      if (!_disposed) currencyRates = snapshot;
+    } catch (_) {
+      if (!_disposed) {
+        rateError = currencyRates == null
+            ? 'Kurs belum tersedia. Periksa koneksi lalu coba lagi.'
+            : 'Pembaruan gagal. Menggunakan kurs terakhir yang berhasil dimuat.';
+      }
+    } finally {
+      if (!_disposed) {
+        isLoadingRates = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   String get displayInput => input.replaceAll('.', ',');
   void enter(String key) {
     if (key == 'backspace') {

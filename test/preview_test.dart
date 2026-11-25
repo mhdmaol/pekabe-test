@@ -6,6 +6,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pekabe_converter/app.dart';
+
+import 'support/rate_fixture.dart';
+
 import 'package:pekabe_converter/components/organisms/converter_panel/converter_panel.dart';
 
 void main() {
@@ -23,7 +26,10 @@ void main() {
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
     final key = GlobalKey();
     await tester.pumpWidget(
-      RepaintBoundary(key: key, child: const PekabeApp()),
+      RepaintBoundary(
+        key: key,
+        child: PekabeApp(rateSource: FixtureRateSource()),
+      ),
     );
     await tester.pumpAndSettle();
     Future<void> capture(String name) async {

@@ -16,7 +16,7 @@ flutter run
 ## Fitur
 
 - Enam kartu kategori dengan layout satu kolom di ponsel, dua kolom di tablet kecil, tiga kolom di desktop.
-- Konversi mata uang demo, panjang, massa, suhu, volume, waktu dan kecepatan.
+- Konversi mata uang via API Frankfurter, panjang, massa, suhu, volume, waktu dan kecepatan.
 - Dropdown satuan, keypad, desimal, hapus digit, reset, ubah tanda dan tukar arah.
 - Tombol tukar mempertahankan angka masukan dan menukar pasangan satuannya.
 - Keyboard angka, titik, Backspace dan Delete juga didukung.
@@ -33,6 +33,8 @@ lib/
   domain/
     conversion_category.dart
     conversion_engine.dart
+    currency_rates.dart
+  data/currency_rate_source.dart
   state/converter_controller.dart
   components/
     atoms/
@@ -43,6 +45,7 @@ lib/
     molecules/
       category_card/category_card.dart
       conversion_field/conversion_field.dart
+      currency_rate_status/currency_rate_status.dart
     organisms/
       category_grid/category_grid.dart
       converter_panel/converter_panel.dart
@@ -64,7 +67,17 @@ Halaman kategori mengikuti gambar mobile; badge kecil dari kartu kompak ditampil
 
 ## Batasan data
 
-Kurs **statis untuk demo**, bukan kurs pasar: USD = 1; IDR = 1/18.000 USD; EUR = 1,08 USD; JPY = 0,0067 USD. Tidak ada API, autentikasi, backend atau penyimpanan. Nilai USD–IDR mengikuti contoh gambar. Ganti sumber data sebelum pemakaian transaksi. Galon memakai galon AS, lbs/oz memakai avoirdupois. Hasil ditampilkan sampai enam angka desimal atau notasi ilmiah untuk nilai sangat kecil/besar. Masukan dibatasi 12 digit.
+Mata uang memakai [Frankfurter v2](https://frankfurter.dev/) tanpa API key:
+
+```text
+GET https://api.frankfurter.dev/v2/rates?base=USD&quotes=IDR,EUR,JPY
+```
+
+Kurs diambil ketika halaman mata uang dibuka, aplikasi kembali aktif, atau pengguna menekan **Perbarui kurs**. Tidak ada polling di latar belakang. API menyediakan kurs referensi, bukan harga pasar per detik. UI menampilkan tanggal kurs dari API (rentang jika berbeda antar mata uang) serta waktu pemeriksaan dalam waktu lokal perangkat. Konversi antar mata uang memakai satu snapshot berbasis USD: `amount / rateFrom * rateTo`.
+
+Permintaan dibatasi 12 detik dan client ditutup setelah selesai. HTTP error, JSON rusak, tanggal tidak valid, kurs nol/negatif, dan mata uang yang hilang ditolak. Tanpa data berhasil, hasil ditampilkan sebagai `—`; tidak ada fallback ke kurs demo. Jika refresh gagal, snapshot terakhir pada halaman yang sama dipertahankan dengan pesan yang jelas. Snapshot hanya disimpan di memori halaman, bukan disk; membuka kembali halaman memerlukan koneksi. Keypad, dropdown, dan swap tidak membuat permintaan tambahan. Android release memiliki izin Internet; akses API web/CORS telah diperiksa.
+
+Satuan selain mata uang tetap offline. Galon memakai galon AS; lbs/oz memakai avoirdupois. Hasil ditampilkan sampai enam angka desimal atau notasi ilmiah untuk nilai sangat kecil/besar. Masukan dibatasi 12 digit.
 
 ## Validasi
 
@@ -76,9 +89,15 @@ flutter build web --release
 flutter build apk --debug
 ```
 
-Pemeriksaan kode bersih. Sembilan tes lolos saat pratinjau diaktifkan: nilai konversi acuan, konversi balik seluruh pasangan satuan, format Indonesia, editing masukan, navigasi/dropdown/keypad/tema, layout 320×568, 390×844 dan 1024×768, serta render pratinjau. Tes pratinjau membuat PNG di `previews/` dan dilewati pada tes biasa. Pratinjau adalah hasil render Flutter test dengan font dimuat; bukan tangkapan layar perangkat Android fisik.
+Pemeriksaan kode bersih. Empat belas tes lolos dengan pratinjau diaktifkan: perhitungan satuan, format angka, input, UI dan layout pada tiga ukuran layar, parsing respons API, cross currency dan arah balik, penolakan respons tidak valid, timeout, retry, penyimpanan snapshot terakhir, pemuatan saat resume, serta keluar halaman selama permintaan berlangsung.
 
-Build web release berhasil. Status build Android dicatat di `VALIDATION.md`. Figma tidak dapat dibaca langsung melalui sesi browser; implementasi didasarkan pada PNG yang disediakan, sehingga kesamaan dengan layer dan token Figma asli belum diverifikasi.
+Tes memakai `CurrencyRateSource` yang diinjeksi dan respons tiruan sehingga tidak bergantung jaringan. Pratinjau `currency_mobile.png` juga memakai fixture deterministik (bukan bukti kurs terkini). Pemeriksaan jaringan sungguhan dapat diulang dengan:
+
+```sh
+dart run tool/check_currency_api.dart
+```
+
+Build web release berhasil. Status Android dicatat di `VALIDATION.md`; belum diuji di perangkat fisik. Implementasi visual didasarkan pada PNG, bukan layer/token Figma asli.
 
 ## Revisi warna fitur
 

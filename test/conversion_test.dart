@@ -13,10 +13,6 @@ void main() {
       );
   test('Known unit conversions including affine temperatures', () {
     expect(
-      convert(ConversionCatalog.currency, 1, 'USD', 'IDR'),
-      closeTo(18000, 0.0001),
-    );
-    expect(
       convert(ConversionCatalog.length, 1, 'inch', 'cm'),
       closeTo(2.54, 0.0001),
     );
@@ -39,7 +35,9 @@ void main() {
   });
   test('Every pair round trips', () {
     for (final c in [
-      ...ConversionCatalog.categories,
+      ...ConversionCatalog.categories.where(
+        (c) => c.kind != ConversionKind.currency,
+      ),
       ConversionCatalog.speed,
     ]) {
       for (final from in c.units) {
